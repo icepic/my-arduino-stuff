@@ -1,0 +1,2 @@
+avr-gcc -s -mmcu=attiny85 -DF_CPU=8000000 -Os -o digispark digispark.c
+avr-objcopy -O ihex -R .eeprom digispark digispark.hex
