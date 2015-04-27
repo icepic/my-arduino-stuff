@@ -33,33 +33,34 @@ unsigned long mil;
 #define STROBEPIN 12
 
 void setup(void) {
-  uint8_t i;
+
   pinMode(SERDATAIN, OUTPUT);
   pinMode(SHIFTCLOCK, OUTPUT);
   pinMode(STROBEPIN, OUTPUT);
   pinMode(13, OUTPUT);
   
-  for(i=0;i<8;i++) {
+  for(uint8_t i=0;i<8;i++) {
      leds[i] = i;
   }
-  
+  clockout(0);
   return;
 }
 
 
 void loop(void) {
-  uint8_t current_byte;  
+  uint8_t current_byte, old=0;
   // loop 256 times with wrap
-  for (uint8_t outer=1;outer!=0;outer++) {
+  for (uint8_t outer=2;outer!=0;outer +=2) {
     current_byte=0;
     for (uint8_t inner=0;inner < 8;inner++) {
       if (leds[inner] >= outer) {
         current_byte |= _BV(inner);
-      } else {
-        current_byte &= ~_BV(inner);
       } /* if leds are to show */   
     }   /* inner 8 values to compare */
-    clockout(current_byte);
+//    if (current_byte != old) {
+      clockout(current_byte);
+      old = current_byte;
+//    }
   }     /* outer loop for 256 values */
   mil=millis();
   update_values();
@@ -83,10 +84,10 @@ void update_led5() {
 void update_led6() {
 }
 void update_led7() {
-   if ((mil % 20) == 0) leds[5]--;    
+   if ((mil % 20) == 0) leds[6]--;    
 }
 void update_led8() {
-   if ((mil % 20) == 0) leds[4]++;
+   if ((mil % 20) == 0) leds[7]++;
 }
 
 void
@@ -159,8 +160,10 @@ void clockout(uint8_t data) {
       // digitalWrite(SERDATAIN, LOW);
     }
     pin = pin << 1;
-    digitalWrite(SHIFTCLOCK, LOW);
-    digitalWrite(SHIFTCLOCK, HIGH);
+    PORTB &= ~_BV(PORTB7);
+    PORTB |= _BV(PORTB7);
+  //  digitalWrite(SHIFTCLOCK, LOW);
+  //  digitalWrite(SHIFTCLOCK, HIGH);
   }
   digitalWrite(STROBEPIN, LOW); /* enable output */
   return;
