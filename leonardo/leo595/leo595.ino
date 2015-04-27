@@ -17,93 +17,93 @@
 extern "C" {
 #endif
 
-#define MYDELAY 10
+#define MYDELAY 500
 
 void clockout(uint8_t);
 
-  /* pin11 goes to 595 pin 11 */
+/* pin11 goes to 595 pin 11 */
 #define SHIFTCLOCK 11
-  /* pin 8 goes to 595 pin 14 */
-#define SERDATAIN  8 
-  /* to control when data goes out */
+/* pin 8 goes to 595 pin 14 */
+#define SERDATAIN  8
+/* to control when data goes out */
 #define STROBEPIN 12
 
 void setup(void) {
-  pinMode(SERDATAIN,OUTPUT);
-  pinMode(SHIFTCLOCK,OUTPUT);
-  pinMode(STROBEPIN,OUTPUT);
-  pinMode(13,OUTPUT);
+  pinMode(SERDATAIN, OUTPUT);
+  pinMode(SHIFTCLOCK, OUTPUT);
+  pinMode(STROBEPIN, OUTPUT);
+  pinMode(13, OUTPUT);
   return;
 }
 
 
 void loop(void) {
-  uint8_t value=0, overall=0;
+  uint8_t value = 0, overall = 0;
   unsigned long now;
-  
-  for (value=0;value<255;value++) {
-    uint8_t temp=value >> 4; /* need only 4 major bits */
-    now=millis();
+
+  for (value = 0; value < 255; value++) {
+    uint8_t temp = value >> 4; /* need only 4 major bits */
+    now = micros();
     do {
-      for (overall=0;overall < 16;overall++) {
-	if (temp > overall) {
-	  clockout(255);
-	  digitalWrite(13,HIGH);
-	} else {
-	  clockout(0);
-	  digitalWrite(13,LOW);
-	}
+      for (overall = 0; overall < 16; overall++) {
+        if (temp > overall) {
+          clockout(255);
+          digitalWrite(13, HIGH);
+        } else {
+          clockout(0);
+          digitalWrite(13, LOW);
+        }
       }
-    } while (millis() < (now+MYDELAY));
+    } while (micros() < (now + MYDELAY));
     //    delay(20); /* make the 0-255 stepping visible */
     clockout(0);
-    digitalWrite(13,HIGH);
+    digitalWrite(13, HIGH);
   }
-  
-  for (value=255;value>0;value--) {
-    uint8_t temp=value >> 4; /* need only 4 major bits */
-    now=millis();
+
+  for (value = 255; value > 0; value--) {
+    uint8_t temp = value >> 4; /* need only 4 major bits */
+    now = micros();
     do {
-      for (overall=0;overall < 16;overall++) {
-	if (temp > overall) {
-	  clockout(255);
-	  digitalWrite(13,HIGH);
-	} else {
-	  clockout(0);
-	  digitalWrite(13,LOW);
-	}
+      for (overall = 0; overall < 16; overall++) {
+        if (temp > overall) {
+          clockout(255);
+          digitalWrite(13, HIGH);
+        } else {
+          clockout(0);
+          digitalWrite(13, LOW);
+        }
       }
-    } while (millis() < (now+MYDELAY));
-    //    delay(20); /* make the 0-255 stepping visible */
+    } while (micros() < (now + MYDELAY));
+    // delay(20); /* make the 0-255 stepping visible */
     clockout(0);
-    digitalWrite(13,HIGH);
+    digitalWrite(13, HIGH);
   }
-  
+
   return;
 }
-  /* SAMPLE
-  clockout(255);
-  digitalWrite(13,HIGH);
-  delay(1000);
-  */
+/* SAMPLE
+clockout(255);
+digitalWrite(13,HIGH);
+delay(1000);
+*/
 
 void clockout(uint8_t data) {
-  uint8_t loop,pin=1;
+  uint8_t loop, pin = 1;
 
-  digitalWrite(STROBEPIN,HIGH); /* disable output */
-  for (loop=0;loop<8;loop++) {
+  digitalWrite(STROBEPIN, HIGH); /* disable output */
+  for (loop = 0; loop < 8; loop++) {
     if (data & pin) {
-      // PORTB |= PORTB4; /* set bit one */
-      digitalWrite(SERDATAIN,HIGH);
+      PORTB |= _BV(PORTB4); /* set bit one */
+      // digitalWrite(SERDATAIN, HIGH);
     } else {
-      // PORTB &= ~PORTB4;  /* clear bit one */
-      digitalWrite(SERDATAIN,LOW);
+      PORTB &= ~_BV(PORTB4);  /* clear bit one */
+      // digitalWrite(SERDATAIN, LOW);
     }
     pin = pin << 1;
-    digitalWrite(SHIFTCLOCK,LOW);
-    digitalWrite(SHIFTCLOCK,HIGH);
+    digitalWrite(SHIFTCLOCK, LOW);
+    digitalWrite(SHIFTCLOCK, HIGH);
   }
-  digitalWrite(STROBEPIN,LOW); /* enable output */
+  digitalWrite(STROBEPIN, LOW); /* enable output */
   return;
 }
 
